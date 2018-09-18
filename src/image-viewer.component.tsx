@@ -335,6 +335,14 @@ export default class ImageViewer extends React.Component<Props, State> {
     }).start();
   }
 
+  public moveTo = (index: number) => {
+    this.loadImage(index);
+    this.setState({ currentShowIndex: index })
+    this.positionXNumber = this.width * (index || 0) * (I18nManager.isRTL ? 1 : -1);
+    this.standardPositionX = this.positionXNumber;
+    this.positionX.setValue(this.positionXNumber);
+  }
+
   /**
    * 长按
    */

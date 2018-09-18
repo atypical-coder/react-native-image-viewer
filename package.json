@@ -5,12 +5,11 @@
   "main": "built/index.js",
   "types": "src/index.ts",
   "scripts": {
-    "prepare": "rm -rf built && tsc",
     "start": "tsc -w --outDir demo/built"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ascoders/react-native-image-viewer.git"
+    "url": "https://github.com/atypical-coder/react-native-image-viewer.git"
   },
   "keywords": [
     "image-viewer"
