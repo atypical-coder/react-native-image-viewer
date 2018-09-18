@@ -335,6 +335,28 @@ export default class ImageViewer extends React.Component<Props, State> {
     }).start();
   }
 
+  public moveTo = (index) => {
+    this.positionXNumber = !I18nManager.isRTL
+      ? this.standardPositionX - this.width
+      : this.standardPositionX + this.width;
+    this.standardPositionX = this.positionXNumber;
+    Animated.timing(this.positionX, {
+      toValue: this.positionXNumber,
+      duration: 100
+    }).start();
+
+    this.setState(
+      {
+        currentShowIndex: index
+      },
+      () => {
+        if (this.props.onChange) {
+          this.props.onChange(this.state.currentShowIndex);
+        }
+      }
+    );
+  }
+
   /**
    * 长按
    */
@@ -442,6 +464,7 @@ export default class ImageViewer extends React.Component<Props, State> {
           responderRelease={this.handleResponderRelease}
           onLongPress={this.handleLongPressWithIndex.get(index)}
           onClick={this.handleClick}
+          moveTo={this.moveTo}
           onDoubleClick={this.handleDoubleClick}
           enableSwipeDown={this.props.enableSwipeDown}
           onSwipeDown={this.handleSwipeDown}
@@ -506,6 +529,7 @@ export default class ImageViewer extends React.Component<Props, State> {
               responderRelease={this.handleResponderRelease}
               onLongPress={this.handleLongPressWithIndex.get(index)}
               onClick={this.handleClick}
+              moveTo={this.moveTo}
               onDoubleClick={this.handleDoubleClick}
               imageWidth={width}
               imageHeight={height}
