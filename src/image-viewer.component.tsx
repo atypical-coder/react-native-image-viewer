@@ -99,6 +99,8 @@ export default class ImageViewer extends React.Component<Props, State> {
       () => {
         // 立刻预加载要看的图
         this.loadImage(nextProps.index || 0);
+        // on init already load next img
+        this.loadImage(1);
 
         this.jumpToCurrentImage();
 
@@ -205,11 +207,15 @@ export default class ImageViewer extends React.Component<Props, State> {
 
     if (offsetXRTL < 0) {
       if (this!.state!.currentShowIndex || 0 < this.props.imageUrls.length - 1) {
-        this.loadImage((this!.state!.currentShowIndex || 0) + 1);
+        for (var i = 0; i <= this.props.preLoadQty; i++) {
+          this.loadImage((this.state.currentShowIndex || 0) + (i + 1));
+        }
       }
     } else if (offsetXRTL > 0) {
       if (this!.state!.currentShowIndex || 0 > 0) {
-        this.loadImage((this!.state!.currentShowIndex || 0) - 1);
+        for (var i = 0; i <= this.props.preLoadQty; i++) {
+          this.loadImage((this.state.currentShowIndex || 0) - (i + 1));
+        }
       }
     }
   };
@@ -232,14 +238,18 @@ export default class ImageViewer extends React.Component<Props, State> {
 
       // 这里可能没有触发溢出滚动，为了防止图片不被加载，调用加载图片
       if (this.state.currentShowIndex || 0 > 0) {
-        this.loadImage((this.state.currentShowIndex || 0) - 1);
+        for (var i = 0; i <= this.props.preLoadQty; i++) {
+          this.loadImage((this.state.currentShowIndex || 0) - (i + 1));
+        }
       }
       return;
     } else if (vxRTL < -0.7) {
       // 下一张
       this.goNext.call(this);
       if (this.state.currentShowIndex || 0 < this.props.imageUrls.length - 1) {
-        this.loadImage((this.state.currentShowIndex || 0) + 1);
+        for (var i = 0; i <= this.props.preLoadQty; i++) {
+          this.loadImage((this.state.currentShowIndex || 0) + (i + 1));
+        }
       }
       return;
     }

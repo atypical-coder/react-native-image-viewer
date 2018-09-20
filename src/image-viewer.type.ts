@@ -69,6 +69,11 @@ export class Props {
   public doubleClickInterval?: number;
 
   /**
+   * Preload quantity
+   */
+  public preLoadQty: number = 2;
+
+  /**
    * 长按图片的回调
    */
   public onLongPress?: (image?: IImageInfo) => void = () => {
