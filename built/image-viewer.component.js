@@ -68,12 +68,16 @@ var ImageViewer = /** @class */ (function (_super) {
             var offsetXRTL = !react_native_1.I18nManager.isRTL ? offsetX : -offsetX;
             if (offsetXRTL < 0) {
                 if (_this.state.currentShowIndex || 0 < _this.props.imageUrls.length - 1) {
-                    _this.loadImage((_this.state.currentShowIndex || 0) + 1);
+                    for (var i = 0; i <= _this.props.preLoadQty; i++) {
+                        _this.loadImage((_this.state.currentShowIndex || 0) + (i + 1));
+                    }
                 }
             }
             else if (offsetXRTL > 0) {
                 if (_this.state.currentShowIndex || 0 > 0) {
-                    _this.loadImage((_this.state.currentShowIndex || 0) - 1);
+                    for (var i = 0; i <= _this.props.preLoadQty; i++) {
+                        _this.loadImage((_this.state.currentShowIndex || 0) - (i + 1));
+                    }
                 }
             }
         };
@@ -94,7 +98,9 @@ var ImageViewer = /** @class */ (function (_super) {
                 _this.goBack.call(_this);
                 // 这里可能没有触发溢出滚动，为了防止图片不被加载，调用加载图片
                 if (_this.state.currentShowIndex || 0 > 0) {
-                    _this.loadImage((_this.state.currentShowIndex || 0) - 1);
+                    for (var i = 0; i <= _this.props.preLoadQty; i++) {
+                        _this.loadImage((_this.state.currentShowIndex || 0) - (i + 1));
+                    }
                 }
                 return;
             }
@@ -102,7 +108,9 @@ var ImageViewer = /** @class */ (function (_super) {
                 // 下一张
                 _this.goNext.call(_this);
                 if (_this.state.currentShowIndex || 0 < _this.props.imageUrls.length - 1) {
-                    _this.loadImage((_this.state.currentShowIndex || 0) + 1);
+                    for (var i = 0; i <= _this.props.preLoadQty; i++) {
+                        _this.loadImage((_this.state.currentShowIndex || 0) + (i + 1));
+                    }
                 }
                 return;
             }
@@ -300,6 +308,8 @@ var ImageViewer = /** @class */ (function (_super) {
         }, function () {
             // 立刻预加载要看的图
             _this.loadImage(nextProps.index || 0);
+            // on init already load next img
+            _this.loadImage(1);
             _this.jumpToCurrentImage();
             // 显示动画
             react_native_1.Animated.timing(_this.fadeAnim, {

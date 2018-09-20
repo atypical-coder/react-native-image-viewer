@@ -56,6 +56,10 @@ var Props = /** @class */ (function () {
          */
         this.enableSwipeDown = false;
         /**
+         * 滑动到下一页的X阈值
+         */
+        this.preLoadQty = 2;
+        /**
          * 长按图片的回调
          */
         this.onLongPress = function () {
