@@ -459,6 +459,8 @@ var ImageViewer = /** @class */ (function (_super) {
                             image.props.source = {};
                         }
                         image.props.source = __assign({ uri: image.url }, image.props.source);
+                        image.props.currentIndex = _this.state.currentShowIndex;
+                        image.props.index = index;
                     }
                     return (<react_native_image_pan_zoom_1.default key={index} cropWidth={_this.width} cropHeight={_this.height} maxOverflow={_this.props.maxOverflow} horizontalOuterRangeOffset={_this.handleHorizontalOuterRangeOffset} responderRelease={_this.handleResponderRelease} onLongPress={_this.handleLongPressWithIndex.get(index)} onClick={_this.handleClick} onDoubleClick={_this.handleDoubleClick} imageWidth={width} imageHeight={height} enableSwipeDown={_this.props.enableSwipeDown} onSwipeDown={_this.handleSwipeDown} pinchToZoom={_this.props.enableImageZoom} enableDoubleClickZoom={_this.props.enableImageZoom} doubleClickInterval={_this.props.doubleClickInterval}>
               {_this.props.renderImage(image.props)}
