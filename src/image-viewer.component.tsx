@@ -512,6 +512,8 @@ export default class ImageViewer extends React.Component<Props, State> {
               uri: image.url,
               ...image.props.source
             };
+            image.props.currentIndex = this.state.currentShowIndex;
+            image.props.index = index;
           }
 
           return (
