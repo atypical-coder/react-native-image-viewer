@@ -83,7 +83,7 @@ export class Props {
   /**
    * 单击回调
    */
-  public onClick?: (close?: () => any) => void = () => {
+  public onClick?: (x?: number, y?:number, scale?: number, close?: () => any) => void = () => {
     //
   };
 

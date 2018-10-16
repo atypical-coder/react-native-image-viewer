@@ -203,9 +203,9 @@ var ImageViewer = /** @class */ (function (_super) {
         /**
          * 单击
          */
-        _this.handleClick = function () {
+        _this.handleClick = function (x, y, scale) {
             if (_this.props.onClick) {
-                _this.props.onClick(_this.handleCancel);
+                _this.props.onClick(x, y, scale, _this.handleCancel);
             }
         };
         /**
