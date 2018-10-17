@@ -205,7 +205,7 @@ var ImageViewer = /** @class */ (function (_super) {
          */
         _this.handleClick = function (x, y, scale) {
             if (_this.props.onClick) {
-                _this.props.onClick(x, y, scale, _this.handleCancel);
+                _this.props.onClick(x, y, scale, _this.state.currentShowIndex, _this.handleCancel);
             }
         };
         /**

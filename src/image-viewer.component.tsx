@@ -372,7 +372,7 @@ export default class ImageViewer extends React.Component<Props, State> {
    */
   public handleClick = (x?: number, y?: number, scale?: number) => {
     if (this.props.onClick) {
-      this.props.onClick(x, y, scale, this.handleCancel);
+      this.props.onClick(x, y, scale, this.state.currentShowIndex, this.handleCancel);
     }
   };
 
