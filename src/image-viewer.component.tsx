@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  ViewStyle
+  ViewStyle,
+  DeviceEventEmitter
 } from 'react-native';
 import ImageZoom from 'react-native-image-pan-zoom';
 import styles from './image-viewer.style';
@@ -231,7 +232,6 @@ export default class ImageViewer extends React.Component<Props, State> {
     const isRightMove = I18nManager.isRTL
       ? this.positionXNumber - this.standardPositionX > (this.props.flipThreshold || 0)
       : this.positionXNumber - this.standardPositionX < -(this.props.flipThreshold || 0);
-
     if (vxRTL > 0.7) {
       // 上一张
       this.goBack.call(this);
@@ -288,7 +288,7 @@ export default class ImageViewer extends React.Component<Props, State> {
     }).start();
 
     const nextIndex = (this.state.currentShowIndex || 0) - 1;
-
+    DeviceEventEmitter.emit('resetZoom', {});
     this.setState(
       {
         currentShowIndex: nextIndex
@@ -310,7 +310,6 @@ export default class ImageViewer extends React.Component<Props, State> {
       this.resetPosition.call(this);
       return;
     }
-
     this.positionXNumber = !I18nManager.isRTL
       ? this.standardPositionX - this.width
       : this.standardPositionX + this.width;
@@ -321,7 +320,7 @@ export default class ImageViewer extends React.Component<Props, State> {
     }).start();
 
     const nextIndex = (this.state.currentShowIndex || 0) + 1;
-
+    DeviceEventEmitter.emit('resetZoom', {});
     this.setState(
       {
         currentShowIndex: nextIndex
@@ -347,10 +346,15 @@ export default class ImageViewer extends React.Component<Props, State> {
 
   public moveTo = (index: number) => {
     this.loadImage(index);
-    this.setState({ currentShowIndex: index })
-    this.positionXNumber = this.width * (index || 0) * (I18nManager.isRTL ? 1 : -1);
+    this.setState({ currentShowIndex: index }, () => {
+      this.jumpToCurrentImage();
+      if (this.props.onChange) {
+        this.props.onChange(this.state.currentShowIndex);
+      }
+    });
+    /*this.positionXNumber = this.width * (index || 0) * (I18nManager.isRTL ? 1 : -1);
     this.standardPositionX = this.positionXNumber;
-    this.positionX.setValue(this.positionXNumber);
+    this.positionX.setValue(this.positionXNumber);*/
   }
 
   /**
