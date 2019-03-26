@@ -147,6 +147,7 @@ var ImageViewer = /** @class */ (function (_super) {
                 duration: 100
             }).start();
             var nextIndex = (_this.state.currentShowIndex || 0) - 1;
+            react_native_1.DeviceEventEmitter.emit('resetZoom', {});
             _this.setState({
                 currentShowIndex: nextIndex
             }, function () {
@@ -173,6 +174,7 @@ var ImageViewer = /** @class */ (function (_super) {
                 duration: 100
             }).start();
             var nextIndex = (_this.state.currentShowIndex || 0) + 1;
+            react_native_1.DeviceEventEmitter.emit('resetZoom', {});
             _this.setState({
                 currentShowIndex: nextIndex
             }, function () {
@@ -183,10 +185,15 @@ var ImageViewer = /** @class */ (function (_super) {
         };
         _this.moveTo = function (index) {
             _this.loadImage(index);
-            _this.setState({ currentShowIndex: index });
-            _this.positionXNumber = _this.width * (index || 0) * (react_native_1.I18nManager.isRTL ? 1 : -1);
-            _this.standardPositionX = _this.positionXNumber;
-            _this.positionX.setValue(_this.positionXNumber);
+            _this.setState({ currentShowIndex: index }, function () {
+                _this.jumpToCurrentImage();
+                if (_this.props.onChange) {
+                    _this.props.onChange(_this.state.currentShowIndex);
+                }
+            });
+            /*this.positionXNumber = this.width * (index || 0) * (I18nManager.isRTL ? 1 : -1);
+            this.standardPositionX = this.positionXNumber;
+            this.positionX.setValue(this.positionXNumber);*/
         };
         /**
          * 长按
