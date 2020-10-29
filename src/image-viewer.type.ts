@@ -2,6 +2,14 @@ import * as React from 'react';
 import { Image, ImageURISource, Text, View, ViewStyle } from 'react-native';
 import { simpleStyle } from './image-viewer.style';
 
+interface IOnMove {
+  type: string;
+  positionX: number;
+  positionY: number;
+  scale: number;
+  zoomCurrentDistance: number;
+}
+
 export class Props {
   /**
    * 是否显示
@@ -66,12 +74,40 @@ export class Props {
    */
   public enableSwipeDown?: boolean = false;
 
+  /**
+   * threshold for firing swipe down function
+   */
+  public swipeDownThreshold?: number;
+
   public doubleClickInterval?: number;
 
   /**
    * Preload quantity
    */
   public preLoadQty: number = 2;
+
+  /*
+   * Min and Max scale for zooming
+   */
+  public minScale?: number;
+
+  public maxScale?: number;
+
+  /**
+   * 是否预加载图片
+   */
+  public enablePreload?: boolean = false;
+
+  /**
+   * 翻页时的动画时间
+   */
+  public pageAnimateTime?: number = 100;
+
+  /** 
+   * 是否启用原生动画驱动
+   * Whether to use the native code to perform animations.
+   */
+  public useNativeDriver?: boolean = false;
 
   /**
    * 长按图片的回调
@@ -102,6 +138,10 @@ export class Props {
     //
   };
 
+  public onMove?: (position?: IOnMove) => void = () => {
+    //
+  };
+
   /**
    * 自定义头部
    */
@@ -112,7 +152,7 @@ export class Props {
   /**
    * 自定义尾部
    */
-  public renderFooter?: (currentIndex?: number) => React.ReactElement<any> = () => {
+  public renderFooter?: (currentIndex: number) => React.ReactElement<any> = () => {
     return null as any;
   };
 
@@ -192,6 +232,8 @@ export class Props {
   public onChange?: (index?: number) => void = () => {
     //
   };
+
+  public menus?: ({ cancel, saveToLocal }: any) => React.ReactElement<any>;
 }
 
 export class State {
@@ -204,6 +246,11 @@ export class State {
    * 当前显示第几个
    */
   public currentShowIndex?: number = 0;
+
+  /**
+   * Used to detect if parent component applied new index prop
+   */
+  public prevIndexProp?: number = 0;
 
   /**
    * 图片拉取是否完毕了

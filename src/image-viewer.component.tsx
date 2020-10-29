@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import {
   Animated,
   CameraRoll,
@@ -46,29 +47,32 @@ export default class ImageViewer extends React.Component<Props, State> {
 
   private handleLongPressWithIndex = new Map<number, any>();
 
-  public componentWillMount() {
+  private imageRefs: any[] = [];
+
+  public componentDidMount() {
     this.init(this.props);
   }
 
-  public componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.index !== this.state.currentShowIndex) {
-      this.setState(
-        {
-          currentShowIndex: nextProps.index
-        },
-        () => {
-          // 立刻预加载要看的图
-          this.loadImage(nextProps.index || 0);
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
+    if (nextProps.index !== prevState.prevIndexProp) {
+      return { currentShowIndex: nextProps.index, prevIndexProp: nextProps.index };
+    }
+    return null;
+  }
 
-          this.jumpToCurrentImage();
+  public componentDidUpdate(prevProps: Props, prevState: State) {
+    if (prevProps.index !== this.props.index) {
+      // 立刻预加载要看的图
+      this.loadImage(this.props.index || 0);
 
-          // 显示动画
-          Animated.timing(this.fadeAnim, {
-            toValue: 1,
-            duration: 200
-          }).start();
-        }
-      );
+      this.jumpToCurrentImage();
+
+      // 显示动画
+      Animated.timing(this.fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: !!this.props.useNativeDriver
+      }).start();
     }
   }
 
@@ -95,6 +99,7 @@ export default class ImageViewer extends React.Component<Props, State> {
     this.setState(
       {
         currentShowIndex: nextProps.index,
+        prevIndexProp: nextProps.index || 0,
         imageSizes
       },
       () => {
@@ -108,12 +113,18 @@ export default class ImageViewer extends React.Component<Props, State> {
         // 显示动画
         Animated.timing(this.fadeAnim, {
           toValue: 1,
-          duration: 200
+          duration: 200,
+          useNativeDriver: !!nextProps.useNativeDriver
         }).start();
       }
     );
   }
-
+  /**
+   * reset Image scale and position
+   */
+  public resetImageByIndex = (index: number) => {
+    this.imageRefs[index] && this.imageRefs[index].reset();
+  };
   /**
    * 调到当前看图位置
    */
@@ -174,6 +185,18 @@ export default class ImageViewer extends React.Component<Props, State> {
       imageLoaded = true;
     }
 
+    // 如果已知源图片宽高，直接设置为 success
+    if (image.width && image.height) {
+      if (this.props.enablePreload && imageLoaded === false) {
+        Image.prefetch(image.url);
+      }
+      imageStatus.width = image.width;
+      imageStatus.height = image.height;
+      imageStatus.status = 'success';
+      saveImageSize();
+      return;
+    }
+
     Image.getSize(
       image.url,
       (width: number, height: number) => {
@@ -192,11 +215,20 @@ export default class ImageViewer extends React.Component<Props, State> {
         } catch (newError) {
           // Give up..
           imageStatus.status = 'fail';
+          saveImageSize();
         }
       }
     );
   }
 
+  /**
+   * 预加载图片
+   */
+  public preloadImage = (index: number) => {
+    if (index < this.state.imageSizes!.length) {
+      this.loadImage(index + 1);
+    }
+  };
   /**
    * 触发溢出水平滚动
    */
@@ -284,7 +316,8 @@ export default class ImageViewer extends React.Component<Props, State> {
     this.standardPositionX = this.positionXNumber;
     Animated.timing(this.positionX, {
       toValue: this.positionXNumber,
-      duration: 100
+      duration: this.props.pageAnimateTime,
+      useNativeDriver: !!this.props.useNativeDriver
     }).start();
 
     const nextIndex = (this.state.currentShowIndex || 0) - 1;
@@ -316,7 +349,8 @@ export default class ImageViewer extends React.Component<Props, State> {
     this.standardPositionX = this.positionXNumber;
     Animated.timing(this.positionX, {
       toValue: this.positionXNumber,
-      duration: 100
+      duration: this.props.pageAnimateTime,
+      useNativeDriver: !!this.props.useNativeDriver
     }).start();
 
     const nextIndex = (this.state.currentShowIndex || 0) + 1;
@@ -340,7 +374,8 @@ export default class ImageViewer extends React.Component<Props, State> {
     this.positionXNumber = this.standardPositionX;
     Animated.timing(this.positionX, {
       toValue: this.standardPositionX,
-      duration: 150
+      duration: 150,
+      useNativeDriver: !!this.props.useNativeDriver
     }).start();
   }
 
@@ -462,10 +497,12 @@ export default class ImageViewer extends React.Component<Props, State> {
           maxOverflow={this.props.maxOverflow}
           horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
           responderRelease={this.handleResponderRelease}
+          onMove={this.props.onMove}
           onLongPress={this.handleLongPressWithIndex.get(index)}
           onClick={this.handleClick}
           onDoubleClick={this.handleDoubleClick}
           enableSwipeDown={this.props.enableSwipeDown}
+          swipeDownThreshold={this.props.swipeDownThreshold}
           onSwipeDown={this.handleSwipeDown}
           pinchToZoom={this.props.enableImageZoom}
           enableDoubleClickZoom={this.props.enableImageZoom}
@@ -519,25 +556,33 @@ export default class ImageViewer extends React.Component<Props, State> {
             image.props.currentIndex = this.state.currentShowIndex;
             image.props.index = index;
           }
-
+          if (this.props.enablePreload) {
+            this.preloadImage(this.state.currentShowIndex || 0);
+          }
           return (
             <ImageZoom
               key={index}
+              ref={el => (this.imageRefs[index] = el)}
               cropWidth={this.width}
               cropHeight={this.height}
               maxOverflow={this.props.maxOverflow}
               horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
               responderRelease={this.handleResponderRelease}
+              onMove={this.props.onMove}
               onLongPress={this.handleLongPressWithIndex.get(index)}
               onClick={this.handleClick}
               onDoubleClick={this.handleDoubleClick}
               imageWidth={width}
               imageHeight={height}
               enableSwipeDown={this.props.enableSwipeDown}
+              swipeDownThreshold={this.props.swipeDownThreshold}
               onSwipeDown={this.handleSwipeDown}
-              pinchToZoom={this.props.enableImageZoom}
-              enableDoubleClickZoom={this.props.enableImageZoom}
+              panToMove={!this.state.isShowMenu}
+              pinchToZoom={this.props.enableImageZoom && !this.state.isShowMenu}
+              enableDoubleClickZoom={this.props.enableImageZoom && !this.state.isShowMenu}
               doubleClickInterval={this.props.doubleClickInterval}
+              minScale={this.props.minScale}
+              maxScale={this.props.maxScale}
             >
               {this!.props!.renderImage!(image.props)}
             </ImageZoom>
@@ -603,7 +648,7 @@ export default class ImageViewer extends React.Component<Props, State> {
               </View>
             )}
           <View style={[{ bottom: 0, position: 'absolute', zIndex: 9 }, this.props.footerContainerStyle]}>
-            {this!.props!.renderFooter!(this.state.currentShowIndex)}
+            {this!.props!.renderFooter!(this.state.currentShowIndex || 0)}
           </View>
         </Animated.View>
       </Animated.View>
@@ -627,6 +672,14 @@ export default class ImageViewer extends React.Component<Props, State> {
   public getMenu() {
     if (!this.state.isShowMenu) {
       return null;
+    }
+
+    if (this.props.menus) {
+      return (
+        <View style={this.styles.menuContainer}>
+          {this.props.menus({ cancel: this.handleLeaveMenu, saveToLocal: this.saveToLocal })}
+        </View>
+      );
     }
 
     return (
